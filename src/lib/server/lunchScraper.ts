@@ -1,5 +1,6 @@
-import { lunchMenu } from '$lib/types/lunchMenu';
+import type { LunchMenu } from '$lib/types/lunchMenu';
 
-export async function getLunches() : lunchMenu[] {
-	return "0;";
+export async function getLunches() : Promise<LunchMenu[]> {
+	var a : LunchMenu = {date: 'jedna', lunches: ['dva']};
+	return [a];
 }
