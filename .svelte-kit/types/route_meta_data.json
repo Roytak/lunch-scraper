@@ -1,0 +1,10 @@
+{
+	"/": [
+		"src/routes/+page.ts",
+		"src/routes/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/api/lunch-scraper": [
+		"src/routes/api/lunch-scraper/+server.ts"
+	]
+}
