@@ -1,9 +1,18 @@
+import type { lunchMenu } from "$lib/types/lunchMenu";
 
-export abstract class baseScraper {
+export abstract class BaseScraper {
 	protected _url: string;
 
 	constructor(url: string) {
 		this._url = url;
+	}
+
+	protected getTodayStr(capitalize: boolean = true): string {
+		const today = new Date().toLocaleDateString("cs-CZ", { weekday: "long" });
+		if (capitalize) {
+			return today.charAt(0).toUpperCase() + today.slice(1);
+		}
+		return today;
 	}
 
 	protected async fetchHtml(): Promise<string> {
@@ -12,7 +21,5 @@ export abstract class baseScraper {
 		return html;
 	}
 
-	protected abstract scrapeMenu(html: string): string[];
-
-	public abstract getLunchMenu(): Promise<string[]>;
+	public abstract scrapeMenu(): Promise<lunchMenu>;
 }

@@ -1,9 +1,11 @@
-import { baseScraper } from './baseScraper';
-import { SelepkaScraper } from './selepkaScraper'
+import { BaseScraper } from './baseScraper';
+import { SelepkaScraper } from './selepkaScraper';
+import { HostinaScraper } from './hostinaScraper';
+import type { lunchMenu } from "$lib/types/lunchMenu";
 
 export class LunchScraper {
 	static #instance: LunchScraper;
-	private static scrapers: baseScraper[] = [new SelepkaScraper()];
+	private static scrapers: BaseScraper[] = [new SelepkaScraper(), new HostinaScraper()];
 	private lunchMenus: string[];
 
 	private constructor() { }
@@ -20,8 +22,8 @@ export class LunchScraper {
 		
 	}
 
-	public async getLunchMenu(): Promise<string[]> {
-		const menus = await Promise.all(LunchScraper.scrapers.map(scrapers => scrapers.getLunchMenu()));
+	public async getLunchMenus(): Promise<lunchMenu[]> {
+		const menus = await Promise.all(LunchScraper.scrapers.map(scrapers => scrapers.scrapeMenu()));
 		return menus.flat();
 	}
 }

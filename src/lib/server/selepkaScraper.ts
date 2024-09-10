@@ -1,25 +1,49 @@
-import { baseScraper } from './baseScraper';
+import { BaseScraper } from './baseScraper';
+import type { lunchMenu } from "$lib/types/lunchMenu";
 import * as cheerio from 'cheerio';
 
-export class SelepkaScraper extends baseScraper {
+export class SelepkaScraper extends BaseScraper {
     constructor() {
         super('https://www.selepova.cz/denni-menu/');
     }
 
-    protected scrapeMenu(html: string) {
-        const $ = cheerio.load(html);
-        const menu = [];
-        const today = new Date().toLocaleDateString('cs-CZ', { weekday: 'long' });
-        const todayC = today.charAt(0).toUpperCase() + today.slice(1);
-        const todayMenu = $(`span:contains(${todayC})`).parent().next().children('div').text();
-        menu.push(todayMenu);
-        return menu;
+    private scrapeSoup($: cheerio.CheerioAPI, todayStr: string) {
+        const soup = $(`span:contains("${todayStr}")`).parent().next().children('div').text();
+        /* skip the string "Polévka: " */
+        if (soup) {
+            return { name: soup.slice(9), price: 0 };
+        }
     }
 
-    async getLunchMenu() {
-        const html = await super.fetchHtml();
-        const menu = this.scrapeMenu(html);
-        console.log(menu);
-        return menu;
+    private scrapeMain($: cheerio.CheerioAPI, todayStr: string) {
+        const list = $(`span:contains("${todayStr}")`).parent().next().children('ol');
+        const data = list.extract({
+            name: [
+            {
+                selector: 'h6',
+            }],
+            price: [
+            {
+                selector: 'span',
+            }]
+        })
+
+        return data.name.map((name, index) => {
+            return {
+                name: name,
+                price: parseInt(data.price[index].replace(/\D/g, ''))
+            }
+        });
+    }
+
+    public async scrapeMenu() {
+        const todayStr = this.getTodayStr();
+        const $ = await cheerio.fromURL(this._url);
+
+        return {
+            url: this._url,
+            soup: this.scrapeSoup($, todayStr),
+            main: this.scrapeMain($, todayStr)
+        } as lunchMenu;
     }
 }
