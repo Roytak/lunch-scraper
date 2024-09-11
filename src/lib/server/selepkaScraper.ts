@@ -1,21 +1,24 @@
 import { BaseScraper } from './baseScraper';
-import type { lunchMenu } from "$lib/types/lunchMenu";
+import type { lunchMenu, dish } from "$lib/types/lunchMenu";
 import * as cheerio from 'cheerio';
 
 export class SelepkaScraper extends BaseScraper {
     constructor() {
-        super('https://www.selepova.cz/denni-menu/');
+        super(1, 'Šelepka', 'https://www.selepova.cz/denni-menu/');
     }
 
-    private scrapeSoup($: cheerio.CheerioAPI, todayStr: string) {
+    private scrapeSoup($: cheerio.CheerioAPI, todayStr: string) : dish {
         const soup = $(`span:contains("${todayStr}")`).parent().next().children('div').text();
-        /* skip the string "Polévka: " */
+        
         if (soup) {
+            /* skip the string "Polévka: " */
             return { name: soup.slice(9), price: 0 };
+        } else {
+            return { name: '', price: 0 };
         }
     }
 
-    private scrapeMain($: cheerio.CheerioAPI, todayStr: string) {
+    private scrapeMain($: cheerio.CheerioAPI, todayStr: string) : dish[] {
         const list = $(`span:contains("${todayStr}")`).parent().next().children('ol');
         const data = list.extract({
             name: [
@@ -26,24 +29,28 @@ export class SelepkaScraper extends BaseScraper {
             {
                 selector: 'span',
             }]
-        })
-
-        return data.name.map((name, index) => {
-            return {
-                name: name,
-                price: parseInt(data.price[index].replace(/\D/g, ''))
-            }
         });
+
+        if (data.name.length === 0) {
+            return [];
+        } else {
+            return data.name.map((name, index) => {
+                return {
+                    name: name,
+                    price: parseInt(data.price[index].replace(/\D/g, ''))
+                }
+            });
+        }
     }
 
-    public async scrapeMenu() {
+    public async scrapeMenu() : Promise<lunchMenu> {
         const todayStr = this.getTodayStr();
-        const $ = await cheerio.fromURL(this._url);
+        const $ = await cheerio.fromURL(this._menu.source);
 
-        return {
-            url: this._url,
-            soup: this.scrapeSoup($, todayStr),
-            main: this.scrapeMain($, todayStr)
-        } as lunchMenu;
+        this._menu.soup = this.scrapeSoup($, todayStr);
+        this._menu.main = this.scrapeMain($, todayStr);
+        this._menu.lastUpdated = new Date().toISOString();
+
+        return this._menu;
     }
 }

@@ -1,14 +1,19 @@
 import { BaseScraper } from './baseScraper';
 import { SelepkaScraper } from './selepkaScraper';
 import { HostinaScraper } from './hostinaScraper';
+import { PlzenskyDvurScraper } from './plzenskyDvurScraper';
 import type { lunchMenu } from "$lib/types/lunchMenu";
+import { Cache } from './cache';
 
 export class LunchScraper {
 	static #instance: LunchScraper;
-	private static scrapers: BaseScraper[] = [new SelepkaScraper(), new HostinaScraper()];
-	private lunchMenus: string[];
+	#scrapers: BaseScraper[];
+	#cache: Cache;
 
-	private constructor() { }
+	private constructor() {
+		this.#scrapers = [new SelepkaScraper(), new HostinaScraper(), new PlzenskyDvurScraper()];
+		this.#cache = new Cache();
+	}
 
 	public static get instance(): LunchScraper {
 		if (!LunchScraper.#instance) {
@@ -18,12 +23,16 @@ export class LunchScraper {
 		return LunchScraper.#instance;
 	}
 
-	private async fetchMenus() {
-		
-	}
-
 	public async getLunchMenus(): Promise<lunchMenu[]> {
-		const menus = await Promise.all(LunchScraper.scrapers.map(scrapers => scrapers.scrapeMenu()));
-		return menus.flat();
+		const cachedData = this.#cache.data;
+		if (cachedData) {
+			/* return cached data if it's not null */
+			return cachedData;
+		}
+
+		/* otherwise scrape the menus and store them in the cache */
+		const menus = await Promise.all(this.#scrapers.map(scraper => scraper.scrapeMenu()));
+		this.#cache.data = menus;
+		return menus;
 	}
 }

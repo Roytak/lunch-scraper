@@ -1,11 +1,15 @@
 
-interface meal {
+export interface dish {
 	name: string;
-	price: number;
+	price: number | null;
 }
 
 export interface lunchMenu {
-	url: string;
-	soup: meal;
-	main: meal[];
+	id: number;
+	restaurantName: string;
+	source: string;
+	soup: dish;
+	main: dish[];
+	weekly: dish[] | null;
+	lastUpdated: string;
 }

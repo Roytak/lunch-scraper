@@ -1,22 +1,30 @@
 <script lang="ts">
+	import Menu from '$lib/components/Menu.svelte';
+	import type { lunchMenu } from '$lib/types/lunchMenu.ts';
+
 	export let data;
+	let lunches: lunchMenu[] = data.lunches;
 
 	console.log(data.lunches);
 </script>
 
 <svelte:head>
-	<title>Jíííídlo</title>
+	<title>Jíííídloooo</title>
 </svelte:head>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
-<p>Menu:</p>
-{#each data.lunches as lunch}
-	<p>Polevka: {lunch.soup.name} ... {lunch.soup.price} Kc</p>
-	<p>Hlavni jidla:</p>
-	<ul>
-		{#each lunch.main as main}
-			<li>{main.name} ... {main.price} Kc</li>
+<div class="text-center pt-1">
+<h1 class="text-3xl font-bold underline">
+	Jíííídlooooo Šumavská
+</h1>
+</div>
+
+{#if lunches.length === 0}
+	<p>Nepodařilo se načíst menu</p>
+{:else}
+	<!-- grid for the menus, as many as can fit in a single row, then wrap -->
+	 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+		{#each lunches as lunch}
+			<Menu menu= {lunch} />
 		{/each}
-	</ul>
-{/each}
+	</div>
+{/if}

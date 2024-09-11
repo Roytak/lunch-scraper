@@ -1,10 +1,18 @@
 import type { lunchMenu } from "$lib/types/lunchMenu";
 
 export abstract class BaseScraper {
-	protected _url: string;
+	protected _menu: lunchMenu;
 
-	constructor(url: string) {
-		this._url = url;
+	constructor(id: number, restaurantName: string, source: string) {
+		this._menu = {
+			id,
+			restaurantName,
+			source,
+			soup: { name: "", price: 0 },
+			main: [],
+			weekly: null,
+			lastUpdated: "",
+		};
 	}
 
 	protected getTodayStr(capitalize: boolean = true): string {
@@ -16,7 +24,7 @@ export abstract class BaseScraper {
 	}
 
 	protected async fetchHtml(): Promise<string> {
-		const response = await fetch(this._url);
+		const response = await fetch(this._menu.source);
 		const html = await response.text();
 		return html;
 	}
