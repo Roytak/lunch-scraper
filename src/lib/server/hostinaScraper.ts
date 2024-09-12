@@ -30,7 +30,8 @@ export class HostinaScraper extends BaseScraper {
 	}
 
 	public async scrapeMenu() : Promise<lunchMenu> {
-		const $ = await cheerio.fromURL(this._menu.source);
+		const html = await this.fetchHtml();
+		const $ = await cheerio.load(html);
 
 		this._menu.soup = {name: 'Zeleninová polévka', price: 30};
 		this._menu.main = this.scrapeMainDishes($);

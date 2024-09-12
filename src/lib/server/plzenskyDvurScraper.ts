@@ -57,7 +57,8 @@ export class PlzenskyDvurScraper extends BaseScraper {
     }
 
     public async scrapeMenu() : Promise<lunchMenu> {
-        const $ = await cheerio.fromURL(this._menu.source);
+        const html = await this.fetchHtml();
+        const $ = await cheerio.load(html);
         const todayStr = this.getTodayStr();
 
         this._menu.soup = this.scrapeSoup($, todayStr);

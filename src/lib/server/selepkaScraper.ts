@@ -45,9 +45,11 @@ export class SelepkaScraper extends BaseScraper {
 
     public async scrapeMenu() : Promise<lunchMenu> {
         console.log('Scraping Selepka menu');
+        const html = await this.fetchHtml();
+        console.log(`HTML: ${html}`);
         const todayStr = this.getTodayStr();
         console.log(`Today: ${todayStr}`);
-        const $ = await cheerio.fromURL(this._menu.source);
+        const $ = await cheerio.load(html);
         console.log(`Cheerio: ${$}`);
 
         this._menu.soup = this.scrapeSoup($, todayStr);
