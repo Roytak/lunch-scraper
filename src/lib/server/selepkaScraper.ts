@@ -48,9 +48,11 @@ export class SelepkaScraper extends BaseScraper {
         const $ = await cheerio.fromURL(this._menu.source);
 
         this._menu.soup = this.scrapeSoup($, todayStr);
+        console.log(`Soup: ${this._menu.soup.name}`);
         this._menu.main = this.scrapeMain($, todayStr);
         this._menu.lastUpdated = new Date().toISOString();
 
+        console.log(`Selepka menu: ${this._menu}`);
         return this._menu;
     }
 }
