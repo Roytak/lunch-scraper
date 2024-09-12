@@ -1,11 +1,17 @@
 <script lang="ts">
 	import Menu from '$lib/components/Menu.svelte';
 	import type { lunchMenu } from '$lib/types/lunchMenu.ts';
+	import { onMount } from 'svelte';
 
-	export let data;
-	let lunches: lunchMenu[] = data.lunches;
+	let lunches: lunchMenu[];
+	let loaded = false;
 
-	console.log(data.lunches);
+	onMount(async () => {
+		const res = await fetch(`/api/lunch-scraper`).then((res) => res.json());
+		lunches = res;
+		loaded = true;
+	});
+
 </script>
 
 <svelte:head>
@@ -18,13 +24,18 @@
 </h1>
 </div>
 
-{#if lunches.length === 0}
-	<p>Nepodařilo se načíst menu</p>
+{#if !loaded}
+	<p>Načítám menu...</p>
+	<span class="loading loading-spinner text-primary"></span>
 {:else}
-	<!-- grid for the menus, as many as can fit in a single row, then wrap -->
-	 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-		{#each lunches as lunch}
-			<Menu menu= {lunch} />
-		{/each}
-	</div>
+	{#if lunches.length === 0}
+		<p>Nepodařilo se načíst menu</p>
+	{:else}
+		<!-- grid for the menus, as many as can fit in a single row, then wrap -->
+		 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+			{#each lunches as lunch}
+				<Menu menu= {lunch} />
+			{/each}
+		</div>
+	{/if}
 {/if}
